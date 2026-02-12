@@ -162,7 +162,7 @@ The project uses GitHub Projects to maintain a storyboard. Each pull request wil
 
 ## 8. Project Board & Milestones
 
-**Project Board Link**: [https://github.com/YOUR-USERNAME/enterprisedevgroupproject/projects/1](https://github.com/YOUR-USERNAME/enterprisedevgroupproject/projects/1)
+**Project Board Link**: ```https://github.com/users/patel5d2/projects/2```
 
 
 ---
