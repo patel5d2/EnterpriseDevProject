@@ -114,15 +114,7 @@ The application created in this problem is a University Student Directory progra
 
 ## 4. Class Diagram
 
-[Insert your UML class diagram here - you can use tools like:]
-- draw.io
-- Lucidchart
-- PlantUML
-- Visual Paradigm
-
-```
-[Insert image or PlantUML code here]
-```
+![UML Diagram](classUMLDiagram.png)
 
 ### Class Diagram Description
 
