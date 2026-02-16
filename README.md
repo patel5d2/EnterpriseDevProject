@@ -184,6 +184,12 @@ The application created in this problem is a University Student Directory progra
 **Weekly Milestones**: ```https://github.com/jonathansoriano/EnterpriseDevGroupProject/milestones```
 
 
+### How to Run the Project
+To run the project from the terminal, use the following command:
+```bash
+./mvnw spring-boot:run
+```
+
 ---
 
 ## 9. Weekly Standup Meeting
