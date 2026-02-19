@@ -139,6 +139,18 @@ class StudentRepositoryTest {
         );
     }
 
+    @Test
+    void find_SearchByState(){
+        //Arrange
+        StudentRequest request = StudentRequest.builder()
+                .residentState("OH")
+                .build();
+        //Act
+        List<StudentDto> actualList = repository.find(request);
+        //Assert
+        assertEquals(25, actualList.size());
+    }
+
     @ParameterizedTest
     @MethodSource("variousInputForUniversity")
     void find_SearchByUniversity(
@@ -165,4 +177,18 @@ class StudentRepositoryTest {
 
         );
     }
+
+    @Test
+    void find_SearchByGrade(){
+        //Arrange
+        StudentRequest request = StudentRequest.builder()
+                .grade("Senior")
+                .build();
+        //Act
+        List<StudentDto> actualList = repository.find(request);
+        //Assert
+        assertEquals(8, actualList.size());
+
+    }
+
 }
