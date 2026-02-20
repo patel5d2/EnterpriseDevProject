@@ -1,9 +1,9 @@
 package com.jonathansoriano.enterprisedevgroupproject.controller;
 
-import com.jonathansoriano.enterprisedevgroupproject.domain.StudentRequest;
 import com.jonathansoriano.enterprisedevgroupproject.exception.SearchNotFoundException;
 import com.jonathansoriano.enterprisedevgroupproject.model.Student;
 import com.jonathansoriano.enterprisedevgroupproject.service.StudentService;
+import com.jonathansoriano.enterprisedevgroupproject.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,35 +15,52 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Unit tests for the StudentApiController REST endpoint (/findStudent).
+ * Spring Security filters are disabled via addFilters=false for clean unit
+ * testing.
+ * UserService is mocked to satisfy the SecurityConfig dependency.
+ */
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(controllers = StudentController.class)
+@WebMvcTest(controllers = StudentApiController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class StudentControllerTest {
 
+    /** Mock of the business logic layer used by the controller under test. */
     @MockitoBean
     private StudentService service;
+
+    /**
+     * Required mock for Spring Security's UserDetailsService dependency.
+     * Without this, the WebMvcTest context fails to load due to SecurityConfig.
+     */
+    @MockitoBean
+    private UserService userService;
+
     @Autowired
     private MockMvc mockMvc;
 
-    //We test for exceptions in the controller layer to verify the exception is translated to the
-    //correct HTTP response (Status code, body, headers)
+    /**
+     * Verifies that a successful search returns HTTP 200 with the list of students
+     * as JSON.
+     * Checks that the first two students match the expected names and that the list
+     * has exactly 2 items.
+     */
     @Test
     void find_Http200() throws Exception {
         // Arrange
         List<Student> expectedList = getStudentList();
         when(service.find(any())).thenReturn(expectedList);
 
-        //Act and Assert (andExpect() is our assertions)
+        // Act & Assert
         mockMvc.perform(get("/findStudent")
                 .param("firstName", "Jo")
                 .contentType(MediaType.APPLICATION_JSON))
@@ -53,20 +70,27 @@ class StudentControllerTest {
                 .andExpect(jsonPath("$.length()").value(2));
     }
 
+    /**
+     * Verifies that when the service throws SearchNotFoundException, the controller
+     * returns HTTP 404 Not Found.
+     */
     @Test
-    void find_Http404() throws Exception{
-        //Arrange
-        //when(service.find(any())).thenReturn(Collections.emptyList());
+    void find_Http404() throws Exception {
+        // Arrange
         when(service.find(any())).thenThrow(SearchNotFoundException.class);
-        //Act and Assert (using andExpect() method)
+
+        // Act & Assert
         mockMvc.perform(get("/findStudent")
                 .param("firstName", "Grady")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound());
-
     }
-    
 
+    /**
+     * Helper method that builds a list of two test students named "Jon" and "John".
+     *
+     * @return a list with two Student objects for use in test assertions
+     */
     private List<Student> getStudentList() {
         List<Student> studentList = new ArrayList<>();
 
@@ -99,5 +123,4 @@ class StudentControllerTest {
 
         return studentList;
     }
-
 }

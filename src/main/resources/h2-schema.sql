@@ -19,3 +19,10 @@ CREATE TABLE student (
     social_media_link varchar(255) NULL,
     FOREIGN KEY (university_id) REFERENCES university(id)
 );
+
+CREATE TABLE users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email varchar(255) NOT NULL UNIQUE,
+    password varchar(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE
+);
