@@ -23,7 +23,7 @@
             <span class="nav-title">TRI-STATE STUDENT DIRECTORY</span>
         </div>
         <div class="nav-links">
-            <a href="#" class="nav-link">About</a>
+            <a th:href="@{/about}" class="nav-link">About</a>
             <a th:href="@{/search}" class="nav-link nav-link-active">Search</a>
             <a href="#" class="nav-link">Universities</a>
             <div class="nav-avatar" sec:authentication="name" title="Logged in user"></div>
