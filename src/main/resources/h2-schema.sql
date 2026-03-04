@@ -23,9 +23,7 @@ CREATE TABLE student (
 
 CREATE TABLE app_user (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  student_id BIGINT NOT NULL,
   role varchar(20) NOT NULL,
-  username_email varchar(255) NOT NULL,
-  password varchar(255) NOT NULL,
-  FOREIGN KEY (student_id) REFERENCES student(id)
+  email varchar(255) NOT NULL,
+  password varchar(255) NOT NULL
 );

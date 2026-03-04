@@ -63,7 +63,6 @@ class StudentServiceTest {
         //Act (Testing the method we are testing and check if what we expect matches with what actually happens
         List<Student> actualList = service.find(request);
         //Assert
-        assertEquals(1L, actualList.get(0).getId());
         assertEquals("Rod", actualList.get(0).getFirstName());
         assertEquals("James", actualList.get(0).getLastName());
 

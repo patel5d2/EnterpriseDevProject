@@ -2,6 +2,7 @@ package com.jonathansoriano.enterprisedevgroupproject.repository;
 
 import com.jonathansoriano.enterprisedevgroupproject.domain.StudentRequest;
 import com.jonathansoriano.enterprisedevgroupproject.domain.StudentSignupRequest;
+import com.jonathansoriano.enterprisedevgroupproject.domain.UserRequest;
 import com.jonathansoriano.enterprisedevgroupproject.dto.StudentDto;
 import com.jonathansoriano.enterprisedevgroupproject.util.SqlUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +32,6 @@ public class StudentRepository {
             JOIN university u ON s.university_id = u.id
             WHERE 1 = 1
             """;
-
     public static final String AND_FIRSTNAME = "AND LOWER(s.first_name) LIKE :firstName";
     public static final String AND_LASTNAME = "AND LOWER(s.last_name) LIKE :lastName";
     public static final String AND_RESIDENT_CITY = "AND LOWER(s.resident_city) LIKE :residentCity";
@@ -40,9 +40,16 @@ public class StudentRepository {
     public static final String AND_GRADE = "AND s.grade = :grade";
     public static final String AND_MAJOR = "AND LOWER(s.major) LIKE :major";
 
+
     public static final String INSERT_NEW_STUDENT = """
             INSERT INTO student (first_name, last_name, resident_city, resident_state, university_id, grade, major,email, social_media_link)
             VALUES (:firstName, :lastName, :residentCity, :residentState, :universityId, :grade, :major, :email, :socialMediaLink);
+            
+            """;
+
+    public static final String INSERT_NEW_APP_USER = """
+            INSERT INTO app_user (role, email, password)
+            VALUES (:role, :email, :password);
             
             """;
 
@@ -53,6 +60,15 @@ public class StudentRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    /**
+     * Retrieves a list of students matching the criteria specified in the given request object.
+     * The query is dynamically built based on the non-null fields in the request.
+     *
+     * @param request the {@link StudentRequest} object containing the search criteria such as
+     *                first name, last name, resident city, resident state, university name,
+     *                grade, and major.
+     * @return a {@link List} of {@link StudentDto} objects that match the specified criteria.
+     */
     public List<StudentDto> find(StudentRequest request){
         //MapSqlParameterSource allows you to use placeholders in Query build and assign real value with .addValue() method
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -76,6 +92,17 @@ public class StudentRepository {
         return jdbcTemplate.query(sql.toString(), params, new BeanPropertyRowMapper<>(StudentDto.class, true));
     }
 
+    /**
+     * Inserts a new student record into the database, specifically inserts a new student into the student table, using the details provided in the
+     * {@link StudentSignupRequest} object and returns the number of rows affected by the operation.
+     *
+     * @param student the {@link StudentSignupRequest} object containing the student's details such as
+     *                first name, last name, resident city, resident state, university ID, grade, major,
+     *                email, and social media link.
+     * @return an integer indicating the number of rows affected by the insert operation. A value greater
+     *         than 0 indicates that the operation was successful, while a value of 0 indicates that no rows
+     *         were inserted.
+     */
     public int insertNewStudent(StudentSignupRequest student){
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("firstName", student.getFirstName())
@@ -93,4 +120,21 @@ public class StudentRepository {
                                                                 // Then operation was successful; else no rows were inserted/updated...
     }
 
+    /**
+     * Inserts a new user record into the database, specifically inserts a new user into the app_user table, using the details provided in the {@link UserRequest} object.
+     * The method utilizes the specified role, email, and password from the request object to perform the insertion.
+     *
+     * @param userRequest the {@link UserRequest} object containing the user's role, email, and password.
+     * @return an integer indicating the number of rows affected by the insert operation. A value greater
+     *         than 0 indicates that the operation was successful, while a value of 0 indicates that no rows
+     *         were inserted.
+     */
+    public int insertNewUser(UserRequest userRequest) {
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("role", userRequest.getRole())
+                .addValue("email", userRequest.getEmail())
+                .addValue("password", userRequest.getPassword());
+
+        return jdbcTemplate.update(INSERT_NEW_APP_USER, params);
+    }
 }

@@ -57,6 +57,14 @@ public class StudentController {
 
     }
 
+    /**
+     * Creates a new student in the system based on the provided signup request.
+     *
+     * @param student the {@code StudentSignupRequest} object containing the student's information
+     *                such as first name, last name, city, state, university ID, grade, major, email,
+     *                password, and social media link
+     * @return a {@code ResponseEntity} containing a success message upon successful student creation
+     */
     @PostMapping("/studentSignUp")
     public ResponseEntity<String> createNewStudent(@RequestBody StudentSignupRequest student){
 

@@ -71,7 +71,6 @@ class StudentControllerTest {
         List<Student> studentList = new ArrayList<>();
 
         Student student1 = Student.builder()
-                .id(1L)
                 .firstName("Jon")
                 .lastName("Sanjuan")
                 .residentCity("Cincinnati")
@@ -83,7 +82,6 @@ class StudentControllerTest {
                 .build();
 
         Student student2 = Student.builder()
-                .id(2L)
                 .firstName("John")
                 .lastName("Saint")
                 .residentCity("Cincinnati")
