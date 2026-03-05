@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet" />
-    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body class="auth-page">
@@ -23,10 +23,10 @@
             <span class="nav-title"><strong>STUDENT</strong>NETWORK</span>
         </div>
         <div class="nav-links">
-            <a href="#" class="nav-link">Link One</a>
-            <a href="#" class="nav-link">Link Two</a>
+            <a href="/about.html" class="nav-link">About</a>
+            <a href="/search.html" class="nav-link">Search</a>
             <span class="nav-divider">|</span>
-            <a href="#" class="btn btn-outline-sm">Support</a>
+            <a href="/login.html" class="btn btn-outline-sm">Sign In</a>
         </div>
     </nav>
 
@@ -41,11 +41,11 @@
             </p>
             <div class="stats-row">
                 <div class="stat">
-                    <span class="stat-number">50+</span>
+                    <span class="stat-number">8</span>
                     <span class="stat-label">UNIVERSITIES</span>
                 </div>
                 <div class="stat">
-                    <span class="stat-number">120k+</span>
+                    <span class="stat-number">30+</span>
                     <span class="stat-label">STUDENTS</span>
                 </div>
             </div>
@@ -56,24 +56,14 @@
 
             <!-- Tab Switcher -->
             <div class="tab-bar">
-                <a th:href="@{/login(tab=signin)}" th:classappend="${activeTab == 'signin'} ? 'tab-active' : ''"
-                    class="tab-btn" id="signin-tab">SIGN IN</a>
-                <a th:href="@{/login(tab=signup)}" th:classappend="${activeTab == 'signup'} ? 'tab-active' : ''"
-                    class="tab-btn" id="signup-tab">SIGN UP</a>
+                <button type="button" class="tab-btn tab-active" id="signin-tab" onclick="switchTab('signin')">SIGN
+                    IN</button>
+                <button type="button" class="tab-btn" id="signup-tab" onclick="switchTab('signup')">SIGN UP</button>
             </div>
 
             <!-- SIGN IN Form -->
-            <div th:if="${activeTab == 'signin'}" class="tab-content" id="signin-content">
-                <!-- Success message after registration -->
-                <div th:if="${param.registered}" class="alert alert-success">
-                    Account created successfully! Please sign in.
-                </div>
-                <!-- Logout message -->
-                <div th:if="${logoutMsg != null}" class="alert alert-success" th:text="${logoutMsg}"></div>
-                <!-- Error message -->
-                <div th:if="${errorMsg != null}" class="alert alert-error" th:text="${errorMsg}"></div>
-
-                <form th:action="@{/login}" method="post" id="signin-form">
+            <div class="tab-content" id="signin-content">
+                <form id="signin-form" onsubmit="return handleSignIn(event)">
                     <div class="form-group">
                         <label class="form-label" for="username">UNIVERSITY EMAIL</label>
                         <input type="email" id="username" name="username" class="form-input"
@@ -85,7 +75,6 @@
                         <input type="password" id="password" name="password" class="form-input" placeholder="••••••••"
                             required />
                     </div>
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="btn-primary-full" id="signin-btn">SIGN IN</button>
                 </form>
 
@@ -93,32 +82,20 @@
                 <a href="#" class="sso-link">INSTITUTIONAL SSO LOGIN</a>
             </div>
 
-            <!-- SIGN UP Form -->
-            <div th:if="${activeTab == 'signup'}" class="tab-content" id="signup-content">
-                <!-- Registration error -->
-                <div th:if="${registerError != null}" class="alert alert-error" th:text="${registerError}"></div>
-
-                <form th:action="@{/register}" method="post" th:object="${registerForm}" id="signup-form">
+            <!-- SIGN UP Form (hidden by default) -->
+            <div class="tab-content" id="signup-content" style="display: none;">
+                <form id="signup-form" onsubmit="return handleSignUp(event)">
                     <div class="form-group">
                         <label class="form-label" for="reg-email">UNIVERSITY EMAIL</label>
-                        <input type="email" id="reg-email" th:field="*{email}"
-                            th:classappend="${#fields.hasErrors('email')} ? 'input-error' : ''" class="form-input"
+                        <input type="email" id="reg-email" name="email" class="form-input"
                             placeholder="student@edu.university" required />
                         <small class="form-hint">* Requires verification via .edu domain</small>
-                        <div th:if="${#fields.hasErrors('email')}" class="field-error">
-                            <span th:errors="*{email}"></span>
-                        </div>
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="reg-password">CREATE PASSWORD</label>
-                        <input type="password" id="reg-password" th:field="*{password}"
-                            th:classappend="${#fields.hasErrors('password')} ? 'input-error' : ''" class="form-input"
+                        <input type="password" id="reg-password" name="password" class="form-input"
                             placeholder="Min. 8 characters" required />
-                        <div th:if="${#fields.hasErrors('password')}" class="field-error">
-                            <span th:errors="*{password}"></span>
-                        </div>
                     </div>
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="btn-primary-full" id="signup-btn">VERIFIED SIGN UP</button>
                 </form>
 
@@ -128,6 +105,50 @@
 
         </div>
     </div>
+
+    <script>
+        /**
+         * Switches between Sign In and Sign Up tabs.
+         */
+        function switchTab(tab) {
+            const signinTab = document.getElementById('signin-tab');
+            const signupTab = document.getElementById('signup-tab');
+            const signinContent = document.getElementById('signin-content');
+            const signupContent = document.getElementById('signup-content');
+
+            if (tab === 'signin') {
+                signinTab.classList.add('tab-active');
+                signupTab.classList.remove('tab-active');
+                signinContent.style.display = 'block';
+                signupContent.style.display = 'none';
+            } else {
+                signupTab.classList.add('tab-active');
+                signinTab.classList.remove('tab-active');
+                signupContent.style.display = 'block';
+                signinContent.style.display = 'none';
+            }
+        }
+
+        /**
+         * Placeholder sign-in handler.
+         * Authentication is not implemented on the backend yet.
+         */
+        function handleSignIn(e) {
+            e.preventDefault();
+            alert('Sign-in functionality is not yet connected to a backend authentication service.');
+            return false;
+        }
+
+        /**
+         * Placeholder sign-up handler.
+         * Registration is not implemented on the backend yet.
+         */
+        function handleSignUp(e) {
+            e.preventDefault();
+            alert('Sign-up functionality is not yet connected to a backend registration service.');
+            return false;
+        }
+    </script>
 
 </body>
 
