@@ -1,6 +1,8 @@
 package com.jonathansoriano.enterprisedevgroupproject.service;
 
 import com.jonathansoriano.enterprisedevgroupproject.domain.StudentRequest;
+import com.jonathansoriano.enterprisedevgroupproject.domain.StudentSignupRequest;
+import com.jonathansoriano.enterprisedevgroupproject.domain.UserRequest;
 import com.jonathansoriano.enterprisedevgroupproject.dto.StudentDto;
 import com.jonathansoriano.enterprisedevgroupproject.exception.SearchNotFoundException;
 import com.jonathansoriano.enterprisedevgroupproject.model.Student;
@@ -15,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 //This annotation is used to initialize the repository mock and service inject mocks.
@@ -94,5 +97,99 @@ class StudentServiceTest {
 
     }
 
+    /**
+     * This Service Layer test makes sure that service.insertNewStudent(...) method acts as expected (happy path), by returning a String message
+     * saying that the student signup was successful.
+     */
+    @Test
+    void insertNewStudent_returnsMessage() {
+        //Arrange
+        //This method takes in a StudentSignupRequest object to start the process of inserting a new student and new user
+        StudentSignupRequest studentSignupRequest = StudentSignupRequest.builder()
+                .firstName("Jonatan")
+                .lastName("Sanjuan")
+                .residentCity("Cincinnati")
+                .residentState("OH")
+                .universityId(1)
+                .grade("Senior")
+                .major("Information Technology")
+                .email("sorianjn@uc.mail.edu")
+                .password("passw0rd!")
+                .socialMediaLink("linkedin.com/sorianjn")
+                .build();
+
+        // Expected Responses from the StudentRepository and UserRepository
+        int expectedResponseFromStudentRepository = 1;
+        int expectedResponseFromUserRepository = 1;
+
+        // Mocking up the expected behavior for when the repository.insertNewStudent(...) gets called and when the repository.insertNewUser(...) gets called
+        when(repository.insertNewStudent(studentSignupRequest)).thenReturn(expectedResponseFromStudentRepository);
+        when(repository.insertNewUser(any())).thenReturn(expectedResponseFromUserRepository);
+
+        //Act
+        String actualReturnValueFromInsertNewStudent = service.insertNewStudent(studentSignupRequest);
+        //Assert
+        assertEquals("Student Signup Successful!", actualReturnValueFromInsertNewStudent);
+    }
+
+//    /**
+//     * This Service Layer test makes sure that service.insertNewStudent(...) method returns a RunTimeException when
+//     * the user decides to omit a required field (password) for when creating a new user.
+//     */
+//    @Test
+//    void insertNewStudent_returnsExceptionForNewUser() {
+//        //Arrange (Create a Request with a null password, since the password field is required to create a new user)
+//        StudentSignupRequest studentSignupRequest = StudentSignupRequest.builder()
+//                .firstName("Jonatan")
+//                .lastName("Sanjuan")
+//                .residentCity("Cincinnati")
+//                .residentState("OH")
+//                .universityId(1)
+//                .grade("Senior")
+//                .major("Information Technology")
+//                .email("sorianjn@uc.mail.edu")
+//                .password(null)
+//                .socialMediaLink("linkedin.com/sorianjn")
+//                .build();
+//
+//        // Expected Responses from the StudentRepository and UserRepository
+//        int expectedResponseFromStudentRepository = 1;
+//        int expectedResponseFromUserRepository = 0;
+//
+//        when(repository.insertNewStudent(studentSignupRequest)).thenReturn(expectedResponseFromStudentRepository);
+//        when(repository.insertNewUser(any())).thenReturn(expectedResponseFromUserRepository);
+//
+//        //Act and Assert (The executable is our act part of the test)
+//        assertThrows(RuntimeException.class, ()-> service.insertNewStudent(studentSignupRequest));
+//    }
+//    /**
+//     * This Service Layer test makes sure that service.insertNewStudent(...) method returns a RunTimeException when
+//     * the user decides to omit a required field (university) for when creating a new Student.
+//     */
+//    @Test
+//    void insertNewStudent_returnsExceptionForNewStudent() {
+//        //Arrange (Create a Request with a null universityId, since the universityId field is required to create a new student)
+//        StudentSignupRequest studentSignupRequest = StudentSignupRequest.builder()
+//                .firstName("Jonatan")
+//                .lastName("Sanjuan")
+//                .residentCity("Cincinnati")
+//                .residentState("OH")
+//                .universityId(null)
+//                .grade("Senior")
+//                .major("Information Technology")
+//                .email("sorianjn@uc.mail.edu")
+//                .password("passw0rd!")
+//                .socialMediaLink("linkedin.com/sorianjn")
+//                .build();
+//        // Expected Responses from the StudentRepository and UserRepository
+//        int expectedResponseFromStudentRepository = 0;
+//        int expectedResponseFromUserRepository = 1;
+//
+//        when(repository.insertNewStudent(studentSignupRequest)).thenReturn(expectedResponseFromStudentRepository);
+//        when(repository.insertNewUser(any())).thenReturn(expectedResponseFromUserRepository);
+//
+//        //Act and Assert (The executable is our act part of the test)
+//        assertThrows(RuntimeException.class, ()-> service.insertNewStudent(studentSignupRequest));
+//    }
 
 }

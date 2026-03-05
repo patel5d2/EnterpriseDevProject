@@ -25,6 +25,14 @@ public class StudentService {
         this.passwordEncoder = new BCryptPasswordEncoder(); // We instantiate it here once in the constructor, so we don't have to instantiate it every time we use it inside this class.
     }
 
+    /**
+     * Searches for students based on the given request criteria and returns a list of matching students.
+     * If no students are found, a {@link SearchNotFoundException} is thrown.
+     *
+     * @param request the {@link StudentRequest} object containing the search parameters for retrieving students.
+     * @return a list of {@link Student} objects that match the search criteria.
+     * @throws SearchNotFoundException if no students are found matching the given criteria.
+     */
     public List<Student> find(StudentRequest request){
         List<Student> students = buildStudentListFromDtoList(repository.find(request));
 
@@ -35,6 +43,18 @@ public class StudentService {
 
     }
 
+    /**
+     * Inserts a new student into the system by creating corresponding entries in the user table
+     * and the student table. The student's password is hashed before insertion for security purposes.
+     *
+     * @param student The {@link StudentSignupRequest} object containing the new student's details
+     *                such as name, email, resident information, university details, and password.
+     * @return A message indicating the success or failure of the student signup operation.
+     *         If successful, returns "Student Signup Successful!".
+     *         Otherwise, an exception is thrown.
+     * @throws RuntimeException if the insertion into the student table or user table fails.
+     *                          Specific exceptions for these failures could be implemented in the future.
+     */
     public String insertNewStudent(StudentSignupRequest student){
         //Logic to Hash the plan password before inserting into the app_user Table
         String hashedPassword = hashPlainTextPassword(student.getPassword());
@@ -47,10 +67,6 @@ public class StudentService {
         //Logic to add a new student to the Student Table
         int studentInsertionResult = repository.insertNewStudent(student);
 
-        if (studentInsertionResult == 0 || userInsertionResult == 0){
-            //Temporary Exception Handling, need to create Custom Exception for when Student Creation fails
-            throw new RuntimeException("Student Signup Failed!");
-        }
         return "Student Signup Successful!";
     }
 
@@ -58,7 +74,17 @@ public class StudentService {
         return passwordEncoder.encode(password);
     }
 
-    static UserRequest buildUserRequestFromStudentSignupRequest(StudentSignupRequest studentSignupRequest, String hashedPassword){
+    /**
+     * Converts a {@link StudentSignupRequest} object into a {@link UserRequest} object.
+     * This method is used to prepare a user request for inserting a user into the system's user table.
+     * The resulting {@link UserRequest} includes the user's email, hashed password, and a default role of "USER".
+     *
+     * @param studentSignupRequest the source {@link StudentSignupRequest} containing the student's signup details,
+     *                             such as email and plain text password.
+     * @param hashedPassword       the hashed version of the student's plain text password to ensure security.
+     * @return a {@link UserRequest} object containing the mapped user data.
+     */
+    private static UserRequest buildUserRequestFromStudentSignupRequest(StudentSignupRequest studentSignupRequest, String hashedPassword){
         return UserRequest.builder()
                 .role("USER")
                 .email(studentSignupRequest.getEmail())
@@ -66,6 +92,14 @@ public class StudentService {
                 .build();
     }
 
+    /**
+     * Converts a list of StudentDto objects into a list of Student objects.
+     * Each StudentDto in the input list is transformed into a corresponding Student
+     * instance by invoking the buildStudentFromDto method.
+     *
+     * @param dtoList the list of StudentDto objects to be converted into Student objects.
+     * @return a list of Student objects created from the given list of StudentDto objects.
+     */
     static List<Student> buildStudentListFromDtoList(List<StudentDto> dtoList){
         List<Student> studentList = new ArrayList<>();
 
@@ -75,6 +109,13 @@ public class StudentService {
         return studentList;
     }
 
+    /**
+     * Builds a {@link Student} object from a given {@link StudentDto}.
+     * The method maps the fields from the provided StudentDto to a new Student instance.
+     *
+     * @param dto the {@link StudentDto} containing student data to be converted into a {@link Student}.
+     * @return a new {@link Student} object populated with the data from the provided {@link StudentDto}.
+     */
     static Student buildStudentFromDto(StudentDto dto){
         return Student.builder()
                 .firstName(dto.getFirstName())

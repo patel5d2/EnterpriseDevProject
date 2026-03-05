@@ -6,6 +6,7 @@ import com.jonathansoriano.enterprisedevgroupproject.domain.UserRequest;
 import com.jonathansoriano.enterprisedevgroupproject.dto.StudentDto;
 import com.jonathansoriano.enterprisedevgroupproject.util.SqlUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -43,14 +44,12 @@ public class StudentRepository {
 
     public static final String INSERT_NEW_STUDENT = """
             INSERT INTO student (first_name, last_name, resident_city, resident_state, university_id, grade, major,email, social_media_link)
-            VALUES (:firstName, :lastName, :residentCity, :residentState, :universityId, :grade, :major, :email, :socialMediaLink);
-            
+            VALUES (:firstName, :lastName, :residentCity, :residentState, :universityId, :grade, :major, :email, :socialMediaLink)
             """;
 
     public static final String INSERT_NEW_APP_USER = """
             INSERT INTO app_user (role, email, password)
-            VALUES (:role, :email, :password);
-            
+            VALUES (:role, :email, :password)
             """;
 
 
@@ -100,8 +99,7 @@ public class StudentRepository {
      *                first name, last name, resident city, resident state, university ID, grade, major,
      *                email, and social media link.
      * @return an integer indicating the number of rows affected by the insert operation. A value greater
-     *         than 0 indicates that the operation was successful, while a value of 0 indicates that no rows
-     *         were inserted.
+     *         than 0 indicates that the operation was successful
      */
     public int insertNewStudent(StudentSignupRequest student){
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -114,10 +112,13 @@ public class StudentRepository {
                 .addValue("major", student.getMajor())
                 .addValue("email", student.getEmail())
                 .addValue("socialMediaLink", student.getSocialMediaLink());
-
-        return jdbcTemplate.update(INSERT_NEW_STUDENT, params); //update() returns an "int" to indicate how many rows
-                                                                // Were affected by the SQL Operation. If int > 0,
-                                                                // Then operation was successful; else no rows were inserted/updated...
+        try{
+            return jdbcTemplate.update(INSERT_NEW_STUDENT, params);//update() returns an "int" to indicate how many rows
+                                                                    // Were affected by the SQL Operation. If int > 0,
+                                                                    // Then operation was successful; else no rows were inserted/updated...
+        }catch (Exception ex){
+            throw new RuntimeException("Student insertion failed due to a database error:" +  ex);
+        }
     }
 
     /**
@@ -126,15 +127,17 @@ public class StudentRepository {
      *
      * @param userRequest the {@link UserRequest} object containing the user's role, email, and password.
      * @return an integer indicating the number of rows affected by the insert operation. A value greater
-     *         than 0 indicates that the operation was successful, while a value of 0 indicates that no rows
-     *         were inserted.
+     *         than 0 indicates that the operation was successful
      */
     public int insertNewUser(UserRequest userRequest) {
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("role", userRequest.getRole())
                 .addValue("email", userRequest.getEmail())
                 .addValue("password", userRequest.getPassword());
-
-        return jdbcTemplate.update(INSERT_NEW_APP_USER, params);
+        try{
+            return jdbcTemplate.update(INSERT_NEW_APP_USER, params);
+        }catch (Exception ex){
+            throw new RuntimeException("User insertion failed due to a database error:" +  ex);
+        }
     }
 }
