@@ -83,7 +83,7 @@ jobs:
       - name: Trivy Scan
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ghcr.io/jonathansoriano/EnterpriseDevGroupProject:latest
+          image-ref: ghcr.io/jonathansoriano/enterprisedevgroupproject:latest
           format: table
           exit-code: 1
           severity: CRITICAL,HIGH
