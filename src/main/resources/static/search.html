@@ -25,7 +25,9 @@
         <div class="nav-links">
             <a href="/about.html" class="nav-link">About</a>
             <a href="/search.html" class="nav-link nav-link-active">Search</a>
-            <a href="#" class="nav-link">Universities</a>
+            <span class="nav-divider">|</span>
+            <span id="user-email" style="font-size:12px; color:var(--color-text-secondary);"></span>
+            <button class="btn-logout" id="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
     </nav>
 
@@ -286,6 +288,36 @@
                 if (e.key === 'Enter') searchStudents();
             });
         });
+
+        /**
+         * Logs the user out by calling the backend logout endpoint
+         * and redirecting to the login page.
+         */
+        async function handleLogout() {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (e) { /* proceed to redirect regardless */ }
+            window.location.href = '/login.html';
+        }
+
+        /**
+         * On page load, verify user is authenticated.
+         * If not, redirect to the login page.
+         * If authenticated, display the user's email in the nav.
+         */
+        (async function enforceAuth() {
+            try {
+                const res = await fetch('/api/session');
+                if (!res.ok) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                const data = await res.json();
+                document.getElementById('user-email').textContent = data.email;
+            } catch (e) {
+                window.location.href = '/login.html';
+            }
+        })();
     </script>
 </body>
 

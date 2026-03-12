@@ -219,13 +219,53 @@
         }
 
         /**
-         * Placeholder sign-in handler.
-         * IMPROVEMENT: A backend login/authentication endpoint (e.g., Spring Security with JWT)
-         * needs to be implemented before this can be connected. Currently shows an informational alert.
+         * Handles the sign-in form submission.
+         * Sends credentials to the backend /api/login endpoint.
+         * On success, redirects to the search page.
+         * On failure, displays an error message.
          */
-        function handleSignIn(e) {
+        async function handleSignIn(e) {
             e.preventDefault();
-            alert('Sign-in is not yet available. A backend authentication endpoint has not been implemented.');
+            const signinBtn = document.getElementById('signin-btn');
+            const email = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            // Remove any previous error
+            const prevError = document.getElementById('signin-error');
+            if (prevError) prevError.remove();
+
+            signinBtn.disabled = true;
+            signinBtn.textContent = 'SIGNING IN...';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    window.location.href = '/search.html';
+                } else {
+                    const data = await response.json().catch(() => null);
+                    const msg = data && data.message ? data.message : 'Invalid email or password.';
+                    const errorDiv = document.createElement('div');
+                    errorDiv.id = 'signin-error';
+                    errorDiv.className = 'alert alert-error';
+                    errorDiv.textContent = msg;
+                    document.getElementById('signin-form').prepend(errorDiv);
+                }
+            } catch (err) {
+                const errorDiv = document.createElement('div');
+                errorDiv.id = 'signin-error';
+                errorDiv.className = 'alert alert-error';
+                errorDiv.textContent = 'Could not connect to the server. Please try again.';
+                document.getElementById('signin-form').prepend(errorDiv);
+            } finally {
+                signinBtn.disabled = false;
+                signinBtn.textContent = 'SIGN IN';
+            }
+
             return false;
         }
 
@@ -233,7 +273,7 @@
          * Handles the sign-up form submission.
          * Collects all form fields, builds a JSON payload matching the backend's
          * StudentSignupRequest DTO, and sends a POST request to /studentSignUp.
-         * On success, notifies the user and redirects to the search page.
+         * On success, shows a success message and switches to the Sign In tab.
          * On failure, displays the error message returned by the server.
          */
         async function handleSignUp(e) {
@@ -242,11 +282,15 @@
             const emailInput = document.getElementById('reg-email');
             const emailError = document.getElementById('email-error');
             const email = emailInput.value.trim().toLowerCase();
+            const signupBtn = document.getElementById('signup-btn');
+            const messageDiv = document.getElementById('signup-message');
 
-            // Clear previous error
+            // Clear previous errors
             emailError.style.display = 'none';
             emailError.textContent = '';
             emailInput.style.borderColor = '';
+            messageDiv.textContent = '';
+            messageDiv.className = '';
 
             // Validate .edu email
             if (!email.endsWith('.edu')) {
@@ -257,9 +301,62 @@
                 return false;
             }
 
-            alert('Sign-up functionality is not yet connected to a backend registration service.');
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'CREATING ACCOUNT...';
+
+            const payload = {
+                firstName: document.getElementById('reg-firstName').value.trim(),
+                lastName: document.getElementById('reg-lastName').value.trim(),
+                email: email,
+                password: document.getElementById('reg-password').value,
+                universityId: parseInt(document.getElementById('reg-university').value),
+                grade: document.getElementById('reg-grade').value,
+                major: document.getElementById('reg-major').value.trim(),
+                residentCity: document.getElementById('reg-city').value.trim(),
+                residentState: document.getElementById('reg-state').value,
+                socialMediaLink: document.getElementById('reg-social').value.trim() || null
+            };
+
+            try {
+                const response = await fetch('/studentSignUp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.status === 201) {
+                    messageDiv.className = 'alert alert-success';
+                    messageDiv.textContent = 'Account created successfully! You can now sign in.';
+                    document.getElementById('signup-form').reset();
+                    // Switch to sign-in tab after a brief delay
+                    setTimeout(() => switchTab('signin'), 2000);
+                } else {
+                    const data = await response.json().catch(() => null);
+                    const msg = data && data.message ? data.message : 'Sign up failed. Please try again.';
+                    messageDiv.className = 'alert alert-error';
+                    messageDiv.textContent = msg;
+                }
+            } catch (err) {
+                messageDiv.className = 'alert alert-error';
+                messageDiv.textContent = 'Could not connect to the server. Please try again.';
+            } finally {
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'VERIFIED SIGN UP';
+            }
+
             return false;
         }
+
+        /**
+         * On page load, check if user is already logged in.
+         * If so, redirect to the search page.
+         */
+        (async function checkSession() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) window.location.href = '/search.html';
+            } catch (e) { /* not logged in, stay on page */ }
+        })();
     </script>
 
 </body>

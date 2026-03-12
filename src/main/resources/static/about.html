@@ -26,7 +26,7 @@
         <div class="nav-links">
             <a href="/about.html" class="nav-link nav-link-active">About</a>
             <a href="/search.html" class="nav-link">Search</a>
-            <a href="/login.html" class="btn-outline-sm">Sign In</a>
+            <a href="/login.html" class="btn-outline-sm" id="nav-auth-btn">Sign In</a>
         </div>
     </nav>
 
@@ -257,6 +257,25 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        /**
+         * On page load, check if user is logged in.
+         * If authenticated, change the Sign In button to show the user's email
+         * and link to the search page instead.
+         */
+        (async function updateNav() {
+            try {
+                const res = await fetch('/api/session');
+                if (res.ok) {
+                    const data = await res.json();
+                    const authBtn = document.getElementById('nav-auth-btn');
+                    authBtn.textContent = data.email;
+                    authBtn.href = '/search.html';
+                }
+            } catch (e) { /* not logged in, keep default nav */ }
+        })();
+    </script>
 
 </body>
 
